@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 测试</title>
+</head>
+<body>
+<h1>WebSocket 测试</h1>
+<!-- 输入框用于输入用户名和密码 -->
+<input type="text" id="usernameInput" placeholder="用户名" value="username1" />
+<input type="password" id="passwordInput" placeholder="密码" value="password1" />
+<button id="connectButton">连接</button>
+<input type="text" id="messageInput" placeholder="输入消息..." />
+<button id="sendButton">发送</button>
+<div id="messages"></div>
+
+<script>
+    let ws;
+
+    // 连接按钮点击事件，获取用户名和密码并建立 WebSocket 连接
+    document.getElementById('connectButton').onclick = () => {
+        const username = document.getElementById('usernameInput').value;
+        const password = document.getElementById('passwordInput').value;
+
+        if (!username || !password) {
+            alert('请输入用户名和密码');
+            return;
+        }
+
+        // 使用输入的用户名和密码构建 WebSocket 连接 URL
+        ws = new WebSocket(`wss://${window.location.host}/link/api/v1/ws?username=${username}&password=${password}`);
+
+        ws.onopen = () => {
+            console.log('连接已建立');
+        };
+
+        ws.onmessage = (event) => {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<div>' + event.data + '</div>';
+        };
+
+        ws.onclose = () => {
+            console.log('连接已关闭');
+        };
+    };
+
+    // 发送消息按钮点击事件
+    document.getElementById('sendButton').onclick = () => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            alert('请先建立连接');
+            return;
+        }
+
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+        ws.send(message);
+        messageInput.value = ''; // 发送后清空输入框
+    };
+</script>
+</body>
+</html>
